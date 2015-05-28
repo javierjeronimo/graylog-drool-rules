@@ -1,11 +1,17 @@
+/**
+ * @author Javier Jerónimo <javier@jeronimosuarez.es>
+ */
 package com.gx;
 
-global java.util.Set controlSet;
+import org.graylog2.plugin.Message
 
-rule "will execute per each Measurement having ID color"
-no-loop
+/**
+ * Processes every GELF message that contains an "executionTime" field:
+ *  - just converts data in origin field to an integer in the result message.
+ */
+rule "Convert executionTime from string to integer"
 when
-	Measurement( id == "color", $colorVal : val )
+	m : Message( getField("executionTime") != null && getField("executionTime").toString().length() > 0 )
 then
-	controlSet.add($colorVal);
+ 	m.addField("executionTime", Integer.valueOf(m.getField("executionTime").toString()));
 end

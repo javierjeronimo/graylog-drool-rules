@@ -1,78 +1,100 @@
 package com.gx;
 
-import static org.junit.Assert.*;
-
-import java.util.HashSet;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
-import org.drools.core.time.SessionPseudoClock;
+import org.graylog2.plugin.Message;
+import org.junit.Before;
 import org.junit.Test;
 import org.kie.api.KieBase;
-import org.kie.api.KieBaseConfiguration;
 import org.kie.api.KieServices;
-import org.kie.api.builder.Message;
 import org.kie.api.builder.Results;
-import org.kie.api.conf.EventProcessingOption;
 import org.kie.api.definition.KiePackage;
 import org.kie.api.definition.rule.Rule;
 import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
-import org.kie.api.runtime.KieSessionConfiguration;
-import org.kie.api.runtime.conf.ClockTypeOption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.*;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertNotNull;
+
 public class RuleTest {
-	static final Logger LOG = LoggerFactory.getLogger(RuleTest.class);
-	
-	@Test
-	public void test() {
-		KieServices kieServices = KieServices.Factory.get();
-        
-		KieContainer kContainer = kieServices.getKieClasspathContainer();
+    static final Logger LOG = LoggerFactory.getLogger(RuleTest.class);
+
+    private KieSession session;
+
+    @Before
+    public void setUp() throws Exception {
+        KieServices kieServices = KieServices.Factory.get();
+
+        KieContainer kContainer = kieServices.getKieClasspathContainer();
         Results verifyResults = kContainer.verify();
-        for (Message m : verifyResults.getMessages()) {
-        	LOG.info("{}", m);
+        for (org.kie.api.builder.Message m : verifyResults.getMessages()) {
+            LOG.info("{}", m);
         }
-        
-	    LOG.info("Creating kieBase");
-	    KieBase kieBase = kContainer.getKieBase();
-        
+
+        LOG.info("Creating kieBase");
+        KieBase kieBase = kContainer.getKieBase();
+
         LOG.info("There should be rules: ");
-        for ( KiePackage kp : kieBase.getKiePackages() ) {
-        	for (Rule rule : kp.getRules()) {
-        		LOG.info("kp " + kp + " rule " + rule.getName());
-        	}
+        for (KiePackage kp : kieBase.getKiePackages()) {
+            for (Rule rule : kp.getRules()) {
+                LOG.info("kp " + kp + " rule " + rule.getName());
+            }
         }
 
-	    LOG.info("Creating kieSession");
-	    KieSession session = kieBase.newKieSession();
-        
-        LOG.info("Populating globals");
-        Set<String> check = new HashSet<String>();
-        session.setGlobal("controlSet", check);
-        
-        LOG.info("Now running data");
-        
-        Measurement mRed= new Measurement("color", "red");
-        session.insert(mRed);
-        session.fireAllRules();
-        
-        Measurement mGreen= new Measurement("color", "green");
-        session.insert(mGreen);
-        session.fireAllRules();
-        
-        Measurement mBlue= new Measurement("color", "blue");
-        session.insert(mBlue);
-        session.fireAllRules();
-        
-        LOG.info("Final checks");
+        LOG.info("Creating kieSession");
+        session = kieBase.newKieSession();
 
-	    assertEquals("Size of object in Working Memory is 3", 3, session.getObjects().size());
-	    assertTrue("contains red", check.contains("red"));
-	    assertTrue("contains green", check.contains("green"));
-	    assertTrue("contains blue", check.contains("blue"));
-        
-	}
+        LOG.info("Now running data");
+    }
+
+    @Test
+    public void test_no_executionTime_field() {
+        Map<String, Object> fields = new HashMap<String, Object>();
+        fields.put(Message.FIELD_ID, UUID.randomUUID().toString());
+
+        Message originalMessage = new Message(fields);
+        session.insert(originalMessage);
+        session.fireAllRules();
+
+        assertEquals(1, session.getObjects().size());
+        Message result = (Message) session.getObjects().iterator().next();
+        assertNull(result.getField("executionTime"));
+    }
+
+    @Test
+    public void test_executionTime_input_integer_field() {
+        Map<String, Object> fields = new HashMap<String, Object>();
+        fields.put(Message.FIELD_ID, UUID.randomUUID().toString());
+        fields.put("executionTime", Integer.valueOf(123));
+
+        Message originalMessage = new Message(fields);
+        session.insert(originalMessage);
+        session.fireAllRules();
+
+        assertEquals(1, session.getObjects().size());
+        Message result = (Message) session.getObjects().iterator().next();
+        assertNotNull(result.getField("executionTime"));
+        assertEquals(Integer.class, result.getField("executionTime").getClass());
+        assertEquals(123, result.getField("executionTime"));
+    }
+
+    @Test
+    public void test_executionTime_input_string_field() {
+        Map<String, Object> fields = new HashMap<String, Object>();
+        fields.put(Message.FIELD_ID, UUID.randomUUID().toString());
+        fields.put("executionTime", "123");
+
+        Message originalMessage = new Message(fields);
+        session.insert(originalMessage);
+        session.fireAllRules();
+
+        assertEquals(1, session.getObjects().size());
+        Message result = (Message) session.getObjects().iterator().next();
+        assertNotNull(result.getField("executionTime"));
+        assertEquals(Integer.class, result.getField("executionTime").getClass());
+        assertEquals(123, result.getField("executionTime"));
+    }
 }
