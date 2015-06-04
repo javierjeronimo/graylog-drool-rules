@@ -1,14 +1,7 @@
-/**
- * @author Javier Jerónimo <javier@jeronimosuarez.es>
- */
 package com.gx;
 
 import org.graylog2.plugin.Message
 
-/**
- * Processes every GELF message that contains an "executionTime" field:
- *  - just converts data in origin field to an integer in the result message.
- */
 rule "Convert executionTime from string to integer"
 when
 	m : Message( getField("executionTime") != null && getField("executionTime").toString().length() > 0 )
