@@ -1,11 +1,5 @@
 package com.gx;
 
-import java.util.List
-import java.util.ArrayList
-import java.util.regex.Matcher
-import java.util.regex.Pattern
-import java.util.Iterator
-
 global java.util.Set controlSet;
 
 rule "Convert executionTime from string to integer"
