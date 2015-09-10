@@ -1,4 +1,10 @@
 
+import java.util.List
+import java.util.ArrayList
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+import java.util.Iterator
+
 rule "Convert executionTime from string to integer"
 when
 	m : Message( getField("executionTime") != null && getField("executionTime").toString().length() > 0 )
