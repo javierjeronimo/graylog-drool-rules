@@ -1,7 +1,109 @@
+package com.gx;
+
+import java.util.List
+import java.util.ArrayList
+import java.util.regex.Matcher
+import java.util.regex.Pattern
+import java.util.Iterator
+
+global java.util.Set controlSet;
 
 rule "Convert executionTime from string to integer"
 when
 	m : Message( getField("executionTime") != null && getField("executionTime").toString().length() > 0 )
 then
  	m.addField("executionTime", Integer.valueOf(m.getField("executionTime").toString()));
+end
+
+
+rule "Convert Apache2 fields to GELF fields"
+when
+    m : Message( getField("facility") != null && getField("facility").toString().equalsIgnoreCase("gnxphp_apache") )
+then
+    List<String> list = new ArrayList<String>();
+    Matcher matcher = Pattern.compile("(\".+?\")[ $]\\s*").matcher(m.getMessage());
+    while (matcher.find()){
+        list.add(matcher.group(1).replace("\\", "").replace("\"", ""));
+    }
+
+    if(list.size() > 0) {
+        m.addField("remote_address", list.get(0));
+    }
+
+    if(list.size() > 4 && ! list.get(4).trim().equals("-")) {
+        m.addField("method", list.get(4).split(" ")[0]);
+        m.addField("request_uri", list.get(4).split(" ")[1]);
+    }
+
+    if(list.size() > 5) {
+        m.addField("response_code", Integer.valueOf(list.get(5)));
+    }
+
+    if(list.size() > 6){
+        m.addField("response_size", Integer.valueOf(list.get(6)));
+    }
+
+    if(list.size() > 7 && ! list.get(7).trim().equals("-")) {
+        m.addField("referer", list.get(7));
+    }
+
+    if(list.size() > 8 && ! list.get(8).trim().equals("-")) {
+        m.addField("user_agent", list.get(8));
+    }
+
+    if(list.size() > 9 && ! list.get(9).trim().equals("-")) {
+        m.addField("x-wap-profile", list.get(9));
+    }
+
+    if(list.size() > 10 && ! list.get(10).trim().equals("-")) {
+        m.addField("TM-User-Id", list.get(10));
+    }
+
+    if(list.size() > 11 && ! list.get(11).trim().equals("-")) {
+        m.addField("X-Up-Subno", list.get(11));
+    }
+
+    if(list.size() > 12) {
+        m.addField("processing_time", Integer.valueOf(list.get(12).split(" ")[1]));
+    }
+
+    if(list.size() > 13) {
+        m.addField("connection_status", list.get(13));
+    }
+
+    if(list.size() > 14) {
+        m.addField("content_length", Integer.valueOf(list.get(14)));
+    }
+
+    if(list.size() > 15) {
+        m.addField("thread", Integer.valueOf(list.get(15)));
+    }
+
+    if(list.size() > 16 && ! list.get(16).trim().equals("-")) {
+        m.addField("X-Up-Calling-Line-Id", list.get(16));
+    }
+
+    if(list.size() > 17 && ! list.get(17).trim().equals("-")) {
+        m.addField("X-Network-Info", list.get(17));
+    }
+
+    if(list.size() > 18 && ! list.get(18).trim().equals("-")) {
+        m.addField("X-Msisdn", list.get(18));
+    }
+
+    if(list.size() > 19 && ! list.get(19).trim().equals("-")) {
+        m.addField("X-Ztgo-BearerAddress", list.get(19));
+    }
+
+    if(list.size() > 20 && ! list.get(20).trim().equals("-")) {
+        m.addField("X-DRUTT-PORTAL-USER-MSISDN", list.get(20));
+    }
+
+    if(list.size() > 21 && ! list.get(21).trim().equals("-")) {
+        m.addField("X-Access-Subnym", list.get(21));
+    }
+
+    if(list.size() > 22 && ! list.get(22).trim().equals("-")) {
+        m.addField("Authorization", list.get(22));
+    }
 end

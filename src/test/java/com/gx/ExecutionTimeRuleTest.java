@@ -19,8 +19,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertNotNull;
 
-public class RuleTest {
-    static final Logger LOG = LoggerFactory.getLogger(RuleTest.class);
+public class ExecutionTimeRuleTest {
+    static final Logger LOG = LoggerFactory.getLogger(ExecutionTimeRuleTest.class);
 
     private KieSession session;
 
