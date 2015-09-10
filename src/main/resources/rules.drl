@@ -1,6 +1,3 @@
-package com.gx;
-
-global java.util.Set controlSet;
 
 rule "Convert executionTime from string to integer"
 when
