@@ -1,3 +1,14 @@
+package com.gx;
+
+import org.graylog2.plugin.Message
+
+
+
+
+
+
+
+
 
 import java.util.List
 import java.util.ArrayList
@@ -30,6 +41,8 @@ then
     if(list.size() > 4 && ! list.get(4).trim().equals("-")) {
         m.addField("method", list.get(4).split(" ")[0]);
         m.addField("request_uri", list.get(4).split(" ")[1]);
+
+        m.addField("api_version", list.get(4).split(" ")[1].split("/")[1]);
     }
 
     if(list.size() > 5) {
@@ -61,7 +74,7 @@ then
     }
 
     if(list.size() > 12) {
-        m.addField("processing_time", Integer.valueOf(list.get(12).split(" ")[1]));
+        m.addField("processing_time_seconds", Integer.valueOf(list.get(12).split(" ")[1]) / 1000 / 1000);
     }
 
     if(list.size() > 13) {

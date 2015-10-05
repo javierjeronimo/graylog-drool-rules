@@ -69,6 +69,7 @@ public class Apache2LogsRuleTest {
         assertEquals("GET", result.getField("method"));
 
         assertEquals("/v2/portals/ve_movistar/zedwebssoauthentication/sessions?uuid=70212b7be4ecbaa27d0dc7f053988423&returnDir=http%3A%2F%2Fve.movistar.genexies.net%2Fsection%2Fpreview%2F0-4-2-15-6-1-9-11%2F7718312%2F0%2F3%2F1%2F0%2Fxhtmlmp%3Fgxs%3D8e53b9ff862cb712eca78af3e991b4a5", result.getField("request_uri"));
+        assertEquals("v2", result.getField("api_version"));
 
         assertEquals(Integer.class, result.getField("response_code").getClass());
         assertEquals(302, result.getField("response_code"));
@@ -86,8 +87,8 @@ public class Apache2LogsRuleTest {
 
         assertNull(result.getField("X-Up-Subno"));
 
-        assertEquals(Integer.class, result.getField("processing_time").getClass());
-        assertEquals(1028835, result.getField("processing_time"));
+        assertEquals(Integer.class, result.getField("processing_time_seconds").getClass());
+        assertEquals(1, result.getField("processing_time_seconds"));
 
         assertEquals("-", result.getField("connection_status"));
 
